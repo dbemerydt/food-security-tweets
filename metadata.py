@@ -14,9 +14,9 @@ def listify(raw_text,lang="en"):
 
     return words
 
-food_keywords = ["food","foods","food security","food insecurity","groceries","water","drinks","prepare","preparing","grocery store","store","supermarket","food store","food market","farm","food bank","food assistance","shelter","food pantry","food shelf","SNAP","food stamps","unprepared","shock","help","supplies","fridge","generator","power","canned"]
+food_keywords = ["food","foods","food security","food insecurity","groceries","water","drinks","prepare","preparing","grocery store","store","supermarket","food store","food market","farm","food bank","food assistance","shelter","food pantry","food shelf","snap","food stamps","unprepared","shock","help","supplies","fridge","generator","power","canned",]
 event_keywords = ["rain","wind","emergency","snow","hurricane","tornado","flood*","watson","EF-*","sandy","irene"]
-new=["bread","milk","eggs","hungry","starving","disaster","assistance","eat","mcdonalds","breakfast","dinner","lunch"]
+new_keywords=["bread","milk","eggs","hungry","starving","disaster","assistance","eat","mcdonalds","breakfast","dinner","lunch"]
 
 from datetime import date,timedelta
 events = [
@@ -50,9 +50,12 @@ events = [
 def makefolders():
     from os import mkdir
     for event in events:
-        mkdir("raw-tweets/"+event["name"].lower().replace(" ","-"))
-        for a in food_keywords+event_keywords:
-            mkdir("raw-tweets/"+event["name"].lower().replace(" ","-")+"/"+a.replace(" ","-"))
+        if not isdir("raw-tweets/"+event["name"].lower().replace(" ","-")):
+            mkdir("raw-tweets/"+event["name"].lower().replace(" ","-"))
+        for a in food_keywords+event_keywords+new_keywords:
+            if not isdir("raw-tweets/"+event["name"].lower().replace(" ","-")+"/"+a.replace(" ","-")):
+                mkdir("raw-tweets/"+event["name"].lower().replace(" ","-")+"/"+a.replace(" ","-"))
+
     return 1
 
 import re
@@ -91,26 +94,23 @@ echo "job script completed"'''.format(d.strftime('%Y-%m-%d'),event["name"].lower
             # print(job)
             # print("-"*80)
             time.sleep(0.1)
-
-if __name__ == "__main__":
-    # this submits jobs to grab the data
-    # submit_all_jobs()
-
+            
+from os.path import join,isfile
+import numpy as np
+import pickle
+# from scipy.sparse import lil_matrix,issparse
+import sys
+import json
+sys.path.append("/users/a/r/areagan/work/2014/03-labMTsimple/")
+from labMTsimple.speedy import *
+from labMTsimple.storyLab import *
+def make_word_vectors():
     # now let's grab some results
     # first let's just get the count of tweets.
     # `wc` will be faster than reading the file in python
     all_keywords = food_keywords+event_keywords
     all_keyword_folders = [x.replace(" ","-") for x in all_keywords]
     
-    from os.path import join,isfile
-    import numpy as np
-    import pickle
-    # from scipy.sparse import lil_matrix,issparse
-    import sys
-    import json
-    sys.path.append("/users/a/r/areagan/work/2014/03-labMTsimple/")
-    from labMTsimple.speedy import *
-    from labMTsimple.storyLab import *
     my_LabMT = LabMT(stopVal=0.0)
     for event in events:
         event_folder = "raw-tweets/"+event["name"].lower().replace(" ","-")
@@ -155,10 +155,15 @@ if __name__ == "__main__":
         f.write(pickle.dumps(tweet_counts,protocol=4))
         f.close()
         for j in range(len(all_keywords)):
-            f = open(join(event_folder,all_key_word_folders[j]+"-word-vectors.p"),"wb")
+            f = open(join(event_folder,all_keyword_folders[j]+"-word-vectors.p"),"wb")
             # f.write(pickle.dumps(word_vectors[j].tocsr(),protocol=4))
             f.write(pickle.dumps(word_vectors[j],protocol=4))
             f.close()
                 
+if __name__ == "__main__":
+    # makefolders()
+    
+    # this submits jobs to grab the data
+    # submit_all_jobs()
 
-
+    # make_word_vectors()
