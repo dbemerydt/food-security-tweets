@@ -1,0 +1,11 @@
+2016-11-food-security
+raw-tweets
+# these are the figure folders
+hurricane-irene
+hurricane-sandy
+louisiana-flooding
+tornadoes-1
+tornadoes-2
+*~
+*.zip
+.DS_Store
